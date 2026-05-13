@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {FaTrash, FaRedo, FaPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
 
-
-
 import TopBar from '../components/Task/TopBar';
 import EditableTask from '../components/Task/EditableTask.jsx';
+import ActionModal from '../components/ActionModal';
 import { Link } from '../components/atoms/index.jsx';
 
 import {
@@ -44,6 +43,20 @@ function Today() {
     setShowBacklog((prev) => !prev);
   };
 
+  // États pour gérer les modales
+  const [modalType, setModalType] = useState(null);
+  const [taskToDelete, setTaskToDelete] = useState(null);
+  const [pendingAction, setPendingAction] = useState(null);
+
+  // Afficher la modale welcome à la première visite
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('hasSeenTodayWelcome');
+    if (!hasSeenWelcome) {
+      setModalType('welcome');
+      localStorage.setItem('hasSeenTodayWelcome', 'true');
+    }
+  }, []);
+
   // Sauvegarder les tâches dans le localStorage à chaque modification
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -51,15 +64,25 @@ function Today() {
   
 
   const clearTasks = () => {
-    const backlogTasks = tasks.filter(task => task.status === 'backlog'); // Conserve les tâches du backlog
-    setTasks(backlogTasks); // Met à jour les tâches avec uniquement celles du backlog
-    localStorage.setItem('tasks', JSON.stringify(backlogTasks)); // Met à jour le localStorage
+    setModalType('confirm-clear');
+    setPendingAction('clear-tasks');
+  };
+
+  const confirmClearTasks = () => {
+    const backlogTasks = tasks.filter(task => task.status === 'backlog');
+    setTasks(backlogTasks);
+    localStorage.setItem('tasks', JSON.stringify(backlogTasks));
   };
 
   const resetTasks = () => {
-    const backlogTasks = tasks.filter(task => task.status === 'backlog'); // Conserve les tâches du backlog
-    const nonBacklogTasks = initialTasks.filter(task => task.status !== 'backlog'); // Réinitialise les autres tâches
-    const updatedTasks = [...backlogTasks, ...nonBacklogTasks]; // Combine backlog et tâches réinitialisées
+    setModalType('confirm-reset');
+    setPendingAction('reset-tasks');
+  };
+
+  const confirmResetTasks = () => {
+    const backlogTasks = tasks.filter(task => task.status === 'backlog');
+    const nonBacklogTasks = initialTasks.filter(task => task.status !== 'backlog');
+    const updatedTasks = [...backlogTasks, ...nonBacklogTasks];
     setTasks(updatedTasks);
     localStorage.setItem('tasks', JSON.stringify(updatedTasks));
   };
@@ -77,10 +100,20 @@ function Today() {
   };
   
   const clearBacklog = () => {
+    setModalType('confirm-clear-backlog');
+    setPendingAction('clear-backlog');
+  };
+
+  const confirmClearBacklog = () => {
     setTasks(tasks.filter(task => task.status !== 'backlog'));
   };
   
   const resetBacklog = () => {
+    setModalType('confirm-reset-backlog');
+    setPendingAction('reset-backlog');
+  };
+
+  const confirmResetBacklog = () => {
     const defaultBacklogTasks = initialTasks.filter(task => task.status === 'backlog');
     const otherTasks = tasks.filter(task => task.status !== 'backlog');
     setTasks([...otherTasks, ...defaultBacklogTasks]);
@@ -152,12 +185,33 @@ function Today() {
     setEditingTaskId(null);
   };
 
-  // Nouvelle fonction pour gérer la suppression
-  const handleDelete = (taskId) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
-    if (editingTaskId === taskId) {
-      setEditingTaskId(null);
+  // Fonction pour gérer la suppression avec confirmation
+  const handleDeleteClick = (taskId) => {
+    const task = tasks.find(t => t.id === taskId);
+    setTaskToDelete(task);
+    setModalType('confirm-delete');
+  };
+
+  const confirmDelete = () => {
+    if (taskToDelete) {
+      setTasks(tasks.filter(task => task.id !== taskToDelete.id));
+      if (editingTaskId === taskToDelete.id) {
+        setEditingTaskId(null);
+      }
+      setTaskToDelete(null);
     }
+  };
+
+  // Fonction pour fermer la modale
+  const closeModal = () => {
+    setModalType(null);
+    setTaskToDelete(null);
+    setPendingAction(null);
+  };
+
+  // Fonction de suppression directe (passée aux EditableTask)
+  const handleDelete = (taskId) => {
+    handleDeleteClick(taskId);
   };
 
   const scrollToColumn = (status) => {
@@ -167,10 +221,32 @@ function Today() {
     }
   };
 
+  // Gérer la confirmation des modales
+  const handleConfirm = () => {
+    if (pendingAction === 'clear-tasks') {
+      confirmClearTasks();
+    } else if (pendingAction === 'clear-backlog') {
+      confirmClearBacklog();
+    } else if (pendingAction === 'reset-tasks') {
+      confirmResetTasks();
+    } else if (pendingAction === 'reset-backlog') {
+      confirmResetBacklog();
+    } else if (modalType === 'confirm-delete') {
+      confirmDelete();
+    }
+  };
+
   const columns = ['todo', 'en cours', 'terminé'];
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
+      <ActionModal
+        isOpen={modalType !== null}
+        modalType={modalType}
+        onClose={closeModal}
+        onConfirm={handleConfirm}
+        taskTitle={taskToDelete?.title}
+      />
       
       <Container>
         <TopBar
