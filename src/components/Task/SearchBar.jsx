@@ -11,12 +11,9 @@ const SearchContainer = styled.div`
   border-radius: 8px;
   padding: 8px 12px;
   flex: 1;
-  max-width: 400px;
 
   @media (max-width: 520px) {
-    width: 100%;
     max-width: none;
-    order: -1;
   }
 `;
 

@@ -39,14 +39,17 @@ const ModalContainer = styled.div`
 
   h2 {
     font-size: 24px;
-    
+    line-height: 1;
     text-align: center;
     margin-bottom: 15px;
+
+    @media (max-width: 640px) {
+      font-size: 20px;
+    }
   }
 
   p {
     font-size: 14px;
-    line-height: 1.6;
     color: #202020;
     text-align: center;
     margin-bottom: 10px;
@@ -54,7 +57,6 @@ const ModalContainer = styled.div`
 
   ul {
     font-size: 14px;
-    line-height: 1.8;
     color: #202020;
     margin: 15px 0;
     padding-left: 20px;
@@ -62,6 +64,10 @@ const ModalContainer = styled.div`
 
   li {
     margin-bottom: 8px;
+
+    @media (max-width: 640px) {
+      font-size: 12px;
+    }
   }
 `;
 
@@ -88,7 +94,7 @@ const ButtonContainer = styled.div`
   margin-top: 25px;
   justify-content: center;
 
-  @media (max-width: 480px) {
+  @media (max-width: 640px) {
     flex-direction: column;
     gap: 8px;
   }
