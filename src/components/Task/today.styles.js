@@ -105,7 +105,8 @@ export const TaskList = styled.div`
   border-radius: 5px;
   padding: 8px;
   max-height: 500px;
-  overflow: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   &.backlog-task-list {
     display: flex;
