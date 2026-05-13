@@ -221,6 +221,11 @@ function Today() {
     }
   };
 
+  // Fonction pour afficher la modale welcome à la demande
+  const showWelcome = () => {
+    setModalType('welcome');
+  };
+
   // Gérer la confirmation des modales
   const handleConfirm = () => {
     if (pendingAction === 'clear-tasks') {
@@ -253,6 +258,7 @@ function Today() {
           onAddTask={addNewTask}
           onClearTasks={clearTasks}
           onResetTasks={resetTasks}
+          onShowHelp={showWelcome}
         />
         
         <TaskBoardContainer>

@@ -39,7 +39,7 @@ const ModalContainer = styled.div`
 
   h2 {
     font-size: 24px;
-    color: #000;
+    
     text-align: center;
     margin-bottom: 15px;
   }
@@ -73,7 +73,7 @@ const CloseButton = styled.button`
   border: none;
   font-size: 32px;
   cursor: pointer;
-  color: #000;
+  
   opacity: 0.7;
   transition: opacity 0.2s;
 
@@ -116,7 +116,7 @@ const Button = styled.button`
 
 const PrimaryButton = styled(Button)`
   background-color: #00c642ab;
-  color: #000;
+  
 
   &:hover {
     background-color: #47c600;
@@ -125,7 +125,7 @@ const PrimaryButton = styled(Button)`
 
 const SecondaryButton = styled(Button)`
   background-color: rgba(255, 255, 255, 0.2);
-  color: #000;
+  
   border: 1px solid rgba(255, 255, 255, 0.4);
 
   &:hover {
@@ -135,7 +135,7 @@ const SecondaryButton = styled(Button)`
 
 const DangerButton = styled(Button)`
   background-color: #ff4757;
-  color: #000;
+  
 
   &:hover {
     background-color: #ff3838;
@@ -179,6 +179,10 @@ const ActionModal = ({
             <strong>Sauvegarde automatique :</strong> Toutes vos modifications sont automatiquement enregistrées
             </li>
         </ul>
+        <hr style={{ borderColor: '#7e00ff45'}} />
+        <p>
+            Aucune données n'est envoyée à un serveur, tout est stocké localement dans votre navigateur pour garantir votre confidentialité. Amusez-vous bien ! 🚀
+        </p>
         <ButtonContainer>
             <PrimaryButton onClick={onClose}>
             ✓ Commencer

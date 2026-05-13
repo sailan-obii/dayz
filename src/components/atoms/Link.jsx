@@ -29,8 +29,10 @@ const StyledLink = styled.a`
 `;
 
 
-const Link = ({ onClick, children }) => (
-  <StyledLink onClick={onClick}>{children}</StyledLink>
+const Link = ({ onClick, children, className }) => (
+  <StyledLink className={className} onClick={onClick}>
+    {children}
+  </StyledLink>
 );
 
 export default Link;
