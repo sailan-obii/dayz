@@ -37,6 +37,7 @@ function Today() {
   });
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [newTaskId, setNewTaskId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [showBacklog, setShowBacklog] = useState(false);
   const toggleBacklogVisibility = () => {
@@ -226,6 +227,25 @@ function Today() {
     setModalType('welcome');
   };
 
+  // Fonction pour filtrer les tâches selon le terme de recherche
+  const matchesSearchTerm = (task) => {
+    if (!searchTerm) return true;
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return (
+      task.title.toLowerCase().includes(lowerSearchTerm) ||
+      task.description.toLowerCase().includes(lowerSearchTerm)
+    );
+  };
+
+  // Handlers pour la barre de recherche
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+  };
+
+  const handleSearchClear = () => {
+    setSearchTerm('');
+  };
+
   // Gérer la confirmation des modales
   const handleConfirm = () => {
     if (pendingAction === 'clear-tasks') {
@@ -259,6 +279,9 @@ function Today() {
           onClearTasks={clearTasks}
           onResetTasks={resetTasks}
           onShowHelp={showWelcome}
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+          onSearchClear={handleSearchClear}
         />
         
         <TaskBoardContainer>
@@ -275,7 +298,7 @@ function Today() {
                     isDraggingOver={snapshot.isDraggingOver}
                   >
                     {tasks
-                      .filter(task => task.status === status)
+                      .filter(task => task.status === status && matchesSearchTerm(task))
                       .map((task, index) => (
                         <Draggable 
                           key={task.id} 
@@ -338,7 +361,7 @@ function Today() {
                     className="backlog-task-list" // Classe spécifique pour le backlog
                   >
                     {tasks
-                      .filter(task => task.status === 'backlog')
+                      .filter(task => task.status === 'backlog' && matchesSearchTerm(task))
                       .map((task, index) => (
                         <Draggable 
                           key={task.id} 
