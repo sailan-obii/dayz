@@ -36,7 +36,6 @@ export const Column = styled(BaseColumn)`
   border: 1px solid rgba(255, 255, 255, 0.22);
 
   @media (max-width: 768px) {
-    width: 90%;
     margin: 10px;
     padding: 10px;
   }
@@ -52,13 +51,11 @@ export const SectionHeader = styled.h2`
 `;
 
 export const ColumnBacklog = styled(BaseColumn)`
-  width: 100%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 10.25%, rgba(255, 255, 255, 0.04) 96.75%);
   border: 1px solid rgba(255, 255, 255, 0.22);
 
   @media (max-width: 768px) {
     margin: 10px;
-    width: 90%;
   }
 `;
 
@@ -105,7 +102,8 @@ export const TaskList = styled.div`
   border-radius: 5px;
   padding: 8px;
   max-height: 500px;
-  overflow: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   &.backlog-task-list {
     display: flex;

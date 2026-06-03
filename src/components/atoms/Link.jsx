@@ -16,11 +16,11 @@ const StyledLink = styled.a`
 
   svg { font-size: 0.8em; }
 
-  @media (max-width: 520px) {
+  @media (max-width: 710px) {
     display: block;
     color: #fff;
     background: #3c3c3c52;
-    border: 2px solid #000;
+    border: 2px solid #aeaeae59;
     border-radius: 7px;
     padding: 10px;
     text-align: center;
@@ -29,8 +29,10 @@ const StyledLink = styled.a`
 `;
 
 
-const Link = ({ onClick, children }) => (
-  <StyledLink onClick={onClick}>{children}</StyledLink>
+const Link = ({ onClick, children, className }) => (
+  <StyledLink className={className} onClick={onClick}>
+    {children}
+  </StyledLink>
 );
 
 export default Link;
