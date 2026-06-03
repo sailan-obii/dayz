@@ -4,6 +4,8 @@ Un planificateur quotidien moderne et intuitif pour gérer, organiser et optimis
 
 **[Voir la démo →](https://DeltaDjazz.github.io/dayz)**
 
+![Description de l'image](./public/todaylist_banniere.png)
+
 ---
 
 ## ✨ Fonctionnalités
