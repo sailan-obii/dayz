@@ -2,7 +2,7 @@
 
 Un planificateur quotidien moderne et intuitif pour gérer, organiser et optimiser votre temps au quotidien et pour les jours à venir.
 
-**[Voir la démo →](https://DeltaDjazz.github.io/dayz)**
+**[Voir la démo →](https://sailan-obii.github.io/dayz)**
 
 ![Description de l'image](./public/todaylist_banniere.png)
 
@@ -17,18 +17,8 @@ Un planificateur quotidien moderne et intuitif pour gérer, organiser et optimis
 - **Système de priorités** visuelles avec icônes et couleurs
 - **Backlog** caché/visible pour une meilleure concentration
 - **Persistance locale** avec localStorage
-
-### 📆 **Upcoming** - Gestion des événements futurs
-- **Calendrier** des événements à venir
-- **Ajout/édition** modal d'événements
-- **Groupage** des événements par périodes
-- **Affichage chronologique** intelligent
-
-### 🔧 **Extras**
 - **PWA** (Progressive Web App) - fonctionne hors ligne
 - **Responsive design** - mobile, tablet, desktop
-- **Interface sombre/clair** via thème personnalisé
-- **Navigation fluide** entre les sections
 
 ---
 
@@ -55,7 +45,7 @@ Un planificateur quotidien moderne et intuitif pour gérer, organiser et optimis
 
 ```bash
 # Cloner le projet
-git clone https://github.com/DeltaDjazz/dayz.git
+git clone https://github.com/sailan-obii/dayz.git
 cd dayz
 
 # Installer les dépendances
@@ -137,7 +127,7 @@ npm run deploy
 Cela va :
 1. Builder le projet
 2. Déployer le dossier `dist/` sur la branche `gh-pages`
-3. Le site sera accessible à `https://DeltaDjazz.github.io/dayz`
+3. Le site sera accessible à `https://sailan-obii.github.io/dayz`
 
 ---
 
@@ -169,13 +159,13 @@ MIT
 
 ## 👤 Auteur
 
-**DeltaDjazz**
+**sailan-obii**
 
 ---
 
 ## ❓ Support
 
-Des questions ou des suggestions ? Ouvrez une [issue](https://github.com/DeltaDjazz/dayz/issues) !
+Des questions ou des suggestions ? Ouvrez une [issue](https://github.com/sailan-obii/dayz/issues) !
 
 ---
 
