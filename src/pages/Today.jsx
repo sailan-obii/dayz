@@ -20,12 +20,18 @@ import {
 
 
 const initialTasks = [
-  { id: 'task-1', title: 'Manger escalope à midi', description: 'Cuisiner une escalope de poulet dorée à la perfection, accompagnée d\'un mélange vibrant de légumes frais sautés à l\'huile d\'olive et aux herbes aromatiques', status: 'todo' },
-  { id: 'task-2', title: 'Faire 100 pompes', description: 'Réaliser 5 séries de 20 répétitions', status: 'en cours' },
-  { id: 'task-3', title: 'Dessiner un peu', description: 'Faire de  la perspective et de l\'observation', status: 'todo' },
-  { id: 'task-4', title: 'Faire les courses', description: 'acheter : oeufs, avocats, carottes, liquide vaisselle', status: 'todo' },
-  { id: 'task-5', title: 'Faire de l\'escalade', description: 'à porte de la villette ', status: 'backlog' },
-  { id: 'task-6', title: 'Faire une promenade avec les enfants', description: 'dans le parc du butte chaumont ', status: 'backlog' },
+  { id: 'task-0', title: 'Ranger le bureau', description: 'Trier les papiers et libérer l\'espace de travail.', status: 'terminé' },
+  { id: 'task-1', title: 'Lire quelques pages', description: 'Lire au moins 15 pages du livre en cours.', status: 'todo' },
+  { id: 'task-2', title: 'Apprendre quelque chose de nouveau', description: 'Passer 20 minutes sur un sujet que j\'aimerais mieux comprendre.', status: 'todo' },
+  { id: 'task-4', title: 'Faire une séance de sport', description: 'Prévoir 30 à 45 minutes d\'activité physique.', status: 'todo' },
+  { id: 'task-5', title: 'Avancer sur un projet personnel', description: 'Consacrer une heure à faire avancer un projet personnel.', status: 'en cours' },
+  { id: 'task-6', title: 'Préparer une sortie en famille', description: 'Trouver une activité pour ce week-end.', status: 'backlog' },
+  { id: 'task-7', title: 'Appeler un proche', description: 'Prendre quelques minutes pour appeler quelqu\'un que je n\'ai pas eu récemment.', status: 'backlog' },
+  { id: 'task-8', title: 'Boire de l\'eau', description: 'Consommer au moins 8 verres d\'eau par jour.', status: 'en cours' },
+  { id: 'task-9', title: 'Faire les courses', description: 'Acheter les produits nécessaires pour les prochains jours.', status: 'backlog' },
+  { id: 'task-10', title: 'Faire une lessive', description: 'Lancer une machine et étendre le linge une fois terminé.', status: 'backlog' },
+
+  
 ];
 
 

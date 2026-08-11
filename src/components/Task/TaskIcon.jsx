@@ -34,7 +34,7 @@ const getImageForTask = (title) => {
     return listen;
   } else if (title.match(/voir|regarder/i)) {
     return see;
-  } else if (title.match(/boire|eau/i)) {
+  } else if (title.match(/boire| eau/i)) {
     return drink;
   } else {
     return note;
