@@ -46,6 +46,20 @@ export function pauseTimerWidget(widget, now = Date.now()) {
   };
 }
 
+export function startTimerWidget(widget, now = Date.now()) {
+  if (!widget || widget.type !== 'timer' || widget.isRunning || isTimerComplete(widget, now)) {
+    return widget;
+  }
+  const remainingMs = getTimerRemainingMs(widget, now);
+  if (remainingMs <= 0) return widget;
+  return {
+    ...widget,
+    isRunning: true,
+    endAt: now + remainingMs,
+    remainingMs: null,
+  };
+}
+
 export function createCounterWidget(target, current = 0) {
   const validTarget = clampWidgetValue(target);
   if (validTarget === null) return null;
@@ -64,11 +78,27 @@ export function createTimerWidget(targetMinutes) {
   };
 }
 
-export function syncTaskWidget(task, now = Date.now()) {
+export function canUseWidgetControls(task) {
+  return task?.status === 'en cours';
+}
+
+export function syncTaskWidget(task, now = Date.now(), { previousStatus } = {}) {
   if (!task.widget) return task;
 
   let widget = { ...task.widget };
   let completed = false;
+
+  if (widget.type === 'timer') {
+    if (!canUseWidgetControls(task) && widget.isRunning) {
+      widget = pauseTimerWidget(widget, now);
+    } else if (
+      canUseWidgetControls(task) &&
+      previousStatus != null &&
+      previousStatus !== 'en cours'
+    ) {
+      widget = startTimerWidget(widget, now);
+    }
+  }
 
   if (widget.type === 'counter') {
     completed = isCounterComplete(widget);

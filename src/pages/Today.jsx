@@ -8,8 +8,10 @@ import ActionModal from '../components/ActionModal';
 import { Link } from '../components/atoms/index.jsx';
 import {
   syncAllTasks,
+  syncTaskWidget,
   hasRunningTimer,
   pauseTimerWidget,
+  startTimerWidget,
 } from '../utils/taskWidget';
 
 import {
@@ -165,6 +167,16 @@ function Today() {
     setTasks([...otherTasks, ...defaultBacklogTasks]);
   };
 
+  const handleDragStart = useCallback((result) => {
+    const { source, draggableId } = result;
+    if (source.droppableId !== 'en cours') return;
+
+    setTasks((prev) => syncAllTasks(prev.map((t) => {
+      if (t.id !== draggableId || t.widget?.type !== 'timer') return t;
+      return { ...t, widget: startTimerWidget(t.widget) };
+    })));
+  }, []);
+
   const handleDragEnd = (result) => {
     const { source, destination, draggableId } = result;
 
@@ -193,7 +205,11 @@ function Today() {
       ...destinationTasks
     ];
     
-    setTasks(finalTasks);
+    setTasks(finalTasks.map((t) => syncTaskWidget(
+      t,
+      Date.now(),
+      t.id === draggableId ? { previousStatus: taskToMove.status } : {}
+    )));
   };
 
   const addNewTask = () => {
@@ -249,17 +265,7 @@ function Today() {
   const handleTimerStart = useCallback((taskId) => {
     setTasks((prev) => syncAllTasks(prev.map((t) => {
       if (t.id !== taskId || t.widget?.type !== 'timer') return t;
-      const w = t.widget;
-      const remainingMs = w.remainingMs ?? w.targetMinutes * 60 * 1000;
-      return {
-        ...t,
-        widget: {
-          ...w,
-          isRunning: true,
-          endAt: Date.now() + remainingMs,
-          remainingMs: null,
-        },
-      };
+      return { ...t, widget: startTimerWidget(t.widget) };
     })));
   }, []);
 
@@ -272,8 +278,9 @@ function Today() {
 
   const handleTimerReset = useCallback((taskId) => {
     setTasks((prev) => prev.map((t) => {
-      if (t.id !== taskId || t.widget?.type !== 'timer') return t;
-      return {
+      if (t.id !== taskId || t.widget?.type !== 'timer') return syncTaskWidget(t);
+      const previousStatus = t.status;
+      return syncTaskWidget({
         ...t,
         status: t.status === 'terminé' ? 'en cours' : t.status,
         widget: {
@@ -282,7 +289,7 @@ function Today() {
           endAt: null,
           remainingMs: null,
         },
-      };
+      }, Date.now(), { previousStatus });
     }));
   }, []);
 
@@ -365,7 +372,7 @@ function Today() {
   const columns = ['todo', 'en cours', 'terminé'];
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
+    <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <ActionModal
         isOpen={modalType !== null}
         modalType={modalType}

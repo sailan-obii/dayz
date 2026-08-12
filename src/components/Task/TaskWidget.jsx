@@ -9,6 +9,7 @@ import {
 import {
   formatTimerDisplay,
   getTimerRemainingMs,
+  canUseWidgetControls,
 } from '../../utils/taskWidget';
 
 const stopDrag = (e) => {
@@ -29,16 +30,19 @@ const TaskWidget = ({
 
   if (widget.type === 'counter') {
     const atMax = (widget.current ?? 0) >= (widget.target ?? 1);
+    const canUse = canUseWidgetControls(task);
     return (
       <WidgetContainer>
         <CounterBadge
           type="button"
           onClick={(e) => {
             stopDrag(e);
-            if (!atMax) onIncrement(task.id);
+            if (!canUse || atMax) return;
+            onIncrement(task.id);
           }}
           onPointerDown={stopDrag}
           $complete={atMax}
+          $inactive={!canUse}
           aria-label={`Compteur ${widget.current ?? 0} sur ${widget.target}`}
         >
           {widget.current ?? 0}/{widget.target}
@@ -55,34 +59,36 @@ const TaskWidget = ({
     return (
       <WidgetContainer>
         <TimerDisplay key={tick} $done={isDone}>{formatTimerDisplay(remainingMs)}</TimerDisplay>
-        <WidgetButtonGroup>
-          {!isDone && !isRunning && (
+        {canUseWidgetControls(task) && (
+          <WidgetButtonGroup>
+            {!isDone && !isRunning && (
+              <WidgetButton
+                type="button"
+                onClick={(e) => { stopDrag(e); onTimerStart(task.id); }}
+                onPointerDown={stopDrag}
+              >
+                Start
+              </WidgetButton>
+            )}
+            {!isDone && isRunning && (
+              <WidgetButton
+                type="button"
+                onClick={(e) => { stopDrag(e); onTimerPause(task.id); }}
+                onPointerDown={stopDrag}
+              >
+                Pause
+              </WidgetButton>
+            )}
             <WidgetButton
               type="button"
-              onClick={(e) => { stopDrag(e); onTimerStart(task.id); }}
+              variant="secondary"
+              onClick={(e) => { stopDrag(e); onTimerReset(task.id); }}
               onPointerDown={stopDrag}
             >
-              Start
+              Reset
             </WidgetButton>
-          )}
-          {!isDone && isRunning && (
-            <WidgetButton
-              type="button"
-              onClick={(e) => { stopDrag(e); onTimerPause(task.id); }}
-              onPointerDown={stopDrag}
-            >
-              Pause
-            </WidgetButton>
-          )}
-          <WidgetButton
-            type="button"
-            variant="secondary"
-            onClick={(e) => { stopDrag(e); onTimerReset(task.id); }}
-            onPointerDown={stopDrag}
-          >
-            Reset
-          </WidgetButton>
-        </WidgetButtonGroup>
+          </WidgetButtonGroup>
+        )}
       </WidgetContainer>
     );
   }
