@@ -168,7 +168,7 @@ export const OptionsToggle = styled.button`
   background: transparent;
   cursor: pointer;
   font-size: 13px;
-  text-align: left;
+  text-align: right;
   color: #333;
 
   &:hover {
@@ -191,6 +191,7 @@ export const OptionsLabel = styled.label`
   gap: 6px;
   font-size: 13px;
   cursor: pointer;
+  color: #000;
 `;
 
 export const OptionsRow = styled.div`
@@ -198,6 +199,7 @@ export const OptionsRow = styled.div`
   align-items: center;
   gap: 8px;
   font-size: 13px;
+  color: #000;
 `;
 
 export const OptionsInput = styled.input`
@@ -239,7 +241,7 @@ export const CounterBadge = styled.button`
   padding: 6px 14px;
   border: 2px solid ${props => props.$complete ? '#2e7d32' : '#000'};
   border-radius: 1rem;
-  background: ${props => props.$complete ? 'rgba(46, 125, 50, 0.15)' : 'white'};
+  background: ${props => props.$complete ? 'rgba(46, 125, 50, 0.15)' : '#fffa'};
   font-size: 14px;
   font-weight: 600;
   cursor: ${props => props.$complete ? 'default' : 'pointer'};
