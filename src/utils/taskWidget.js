@@ -82,6 +82,10 @@ export function canUseWidgetControls(task) {
   return task?.status === 'en cours';
 }
 
+export function isCounterInactive(task) {
+  return task?.status === 'todo' || task?.status === 'terminé';
+}
+
 export function syncTaskWidget(task, now = Date.now(), { previousStatus } = {}) {
   if (!task.widget) return task;
 

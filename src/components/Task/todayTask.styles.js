@@ -240,16 +240,21 @@ export const WidgetContainer = styled.div`
 export const CounterBadge = styled.button`
   align-self: flex-start;
   padding: 6px 14px;
-  border: 2px solid ${props => props.$complete ? '#2e7d32' : '#000'};
+  border: 2px solid ${props => props.$complete ? '#2e7d32' : props.$inactive ? '#bbb' : '#000'};
   border-radius: 1rem;
-  background: ${props => props.$complete ? 'rgba(46, 125, 50, 0.15)' : '#fffa'};
+  background: ${props => props.$complete ? 'rgba(46, 125, 50, 0.15)' : props.$inactive ? 'rgba(0, 0, 0, 0.06)' : '#fffa'};
   font-size: 14px;
   font-weight: 600;
-  cursor: ${props => props.$complete ? 'default' : 'pointer'};
-  color: #000;
+  cursor: ${props => (props.$complete || props.$inactive) ? 'default' : 'pointer'};
+  color: ${props => props.$inactive && !props.$complete ? '#888' : '#000'};
+  opacity: ${props => props.$inactive && !props.$complete ? 0.7 : 1};
 
   &:hover {
-    background: ${props => props.$complete ? 'rgba(46, 125, 50, 0.15)' : 'rgba(0, 0, 0, 0.05)'};
+    background: ${props => {
+    if (props.$inactive && !props.$complete) return 'rgba(0, 0, 0, 0.06)';
+    if (props.$complete) return 'rgba(46, 125, 50, 0.15)';
+    return 'rgba(0, 0, 0, 0.05)';
+  }};
   }
 `;
 

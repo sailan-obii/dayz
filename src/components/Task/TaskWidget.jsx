@@ -10,6 +10,7 @@ import {
   formatTimerDisplay,
   getTimerRemainingMs,
   canUseWidgetControls,
+  isCounterInactive,
 } from '../../utils/taskWidget';
 
 const stopDrag = (e) => {
@@ -30,19 +31,19 @@ const TaskWidget = ({
 
   if (widget.type === 'counter') {
     const atMax = (widget.current ?? 0) >= (widget.target ?? 1);
-    const canUse = canUseWidgetControls(task);
+    const inactive = isCounterInactive(task);
     return (
       <WidgetContainer>
         <CounterBadge
           type="button"
           onClick={(e) => {
             stopDrag(e);
-            if (!canUse || atMax) return;
+            if (inactive || atMax) return;
             onIncrement(task.id);
           }}
           onPointerDown={stopDrag}
           $complete={atMax}
-          $inactive={!canUse}
+          $inactive={inactive}
           aria-label={`Compteur ${widget.current ?? 0} sur ${widget.target}`}
         >
           {widget.current ?? 0}/{widget.target}
