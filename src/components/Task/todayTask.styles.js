@@ -232,7 +232,8 @@ export const RemoveOptionButton = styled.button`
 export const WidgetContainer = styled.div`
   margin-top: 8px;
   display: flex;
-  flex-direction: column;
+  flex-direction: ${props => props.$horizontal ? 'row' : 'column'};
+  align-items: ${props => props.$horizontal ? 'center' : 'stretch'};
   gap: 6px;
 `;
 

@@ -57,7 +57,7 @@ const TaskWidget = ({
     const isDone = remainingMs === 0 && !isRunning;
 
     return (
-      <WidgetContainer>
+      <WidgetContainer $horizontal>
         <TimerDisplay key={tick} $done={isDone}>{formatTimerDisplay(remainingMs)}</TimerDisplay>
         {canUseWidgetControls(task) && (
           <WidgetButtonGroup>
