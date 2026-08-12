@@ -21,6 +21,7 @@ const preventDragHandle = {
   onMouseDown: stopDragPropagation,
   onTouchStart: stopDragPropagation,
   onPointerDown: stopDragPropagation,
+  onDoubleClick: stopDragPropagation,
 };
 
 const TaskWidget = ({
