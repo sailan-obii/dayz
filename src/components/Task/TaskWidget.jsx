@@ -13,9 +13,14 @@ import {
   isCounterInactive,
 } from '../../utils/taskWidget';
 
-const stopDrag = (e) => {
+const stopDragPropagation = (e) => {
   e.stopPropagation();
-  e.preventDefault();
+};
+
+const preventDragHandle = {
+  onMouseDown: stopDragPropagation,
+  onTouchStart: stopDragPropagation,
+  onPointerDown: stopDragPropagation,
 };
 
 const TaskWidget = ({
@@ -36,12 +41,12 @@ const TaskWidget = ({
       <WidgetContainer>
         <CounterBadge
           type="button"
+          {...preventDragHandle}
           onClick={(e) => {
-            stopDrag(e);
+            stopDragPropagation(e);
             if (inactive || atMax) return;
             onIncrement(task.id);
           }}
-          onPointerDown={stopDrag}
           $complete={atMax}
           $inactive={inactive}
           aria-label={`Compteur ${widget.current ?? 0} sur ${widget.target}`}
@@ -61,12 +66,12 @@ const TaskWidget = ({
       <WidgetContainer $horizontal>
         <TimerDisplay key={tick} $done={isDone}>{formatTimerDisplay(remainingMs)}</TimerDisplay>
         {canUseWidgetControls(task) && (
-          <WidgetButtonGroup>
+          <WidgetButtonGroup {...preventDragHandle}>
             {!isDone && !isRunning && (
               <WidgetButton
                 type="button"
-                onClick={(e) => { stopDrag(e); onTimerStart(task.id); }}
-                onPointerDown={stopDrag}
+                {...preventDragHandle}
+                onClick={(e) => { stopDragPropagation(e); onTimerStart(task.id); }}
               >
                 Start
               </WidgetButton>
@@ -74,8 +79,8 @@ const TaskWidget = ({
             {!isDone && isRunning && (
               <WidgetButton
                 type="button"
-                onClick={(e) => { stopDrag(e); onTimerPause(task.id); }}
-                onPointerDown={stopDrag}
+                {...preventDragHandle}
+                onClick={(e) => { stopDragPropagation(e); onTimerPause(task.id); }}
               >
                 Pause
               </WidgetButton>
@@ -83,8 +88,8 @@ const TaskWidget = ({
             <WidgetButton
               type="button"
               variant="secondary"
-              onClick={(e) => { stopDrag(e); onTimerReset(task.id); }}
-              onPointerDown={stopDrag}
+              {...preventDragHandle}
+              onClick={(e) => { stopDragPropagation(e); onTimerReset(task.id); }}
             >
               Reset
             </WidgetButton>

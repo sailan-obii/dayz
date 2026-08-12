@@ -9,7 +9,6 @@ import {
   Button,
   TaskContent,
   TaskText,
-  DragHandle,
   OptionsToggle,
   OptionsPanel,
   OptionsLabel,
@@ -136,6 +135,7 @@ const EditableTask = ({
       <Task
         ref={provided.innerRef}
         {...provided.draggableProps}
+        {...provided.dragHandleProps}
         isDragging={snapshot.isDragging}
         status={task.status}
       >
@@ -227,14 +227,12 @@ const EditableTask = ({
     <Task
       ref={provided.innerRef}
       {...provided.draggableProps}
+      {...provided.dragHandleProps}
       isDragging={snapshot.isDragging}
       status={task.status}
     >
       <DeleteButton onClick={handleDeleteClick} type="button" />
       <TaskContent>
-        <DragHandle {...provided.dragHandleProps} aria-label="Déplacer la tâche">
-          ⠿
-        </DragHandle>
         <TaskIcon title={task.title} />
         <TaskText>
           <h3>{task.title}</h3>
