@@ -12,6 +12,7 @@ import {
   hasRunningTimer,
   pauseTimerWidget,
   startTimerWidget,
+  createTimerWidget,
 } from '../utils/taskWidget';
 
 import {
@@ -29,8 +30,8 @@ import {
 const initialTasks = [
   { id: 'task-0', title: 'Ranger le bureau', description: 'Trier les papiers et libérer l\'espace de travail.', status: 'terminé' },
   { id: 'task-1', title: 'Lire quelques pages', description: 'Lire au moins 15 pages du livre en cours.', status: 'todo' },
-  { id: 'task-2', title: 'Apprendre quelque chose de nouveau', description: 'Passer 20 minutes sur un sujet que j\'aimerais mieux comprendre.', status: 'todo' },
-  { id: 'task-4', title: 'Faire une séance de sport', description: 'Prévoir 30 à 45 minutes d\'activité physique.', status: 'todo' },
+  { id: 'task-2', title: 'Apprendre quelque chose de nouveau', description: 'Passer 20 minutes sur un sujet que j\'aimerais mieux comprendre.', status: 'todo', widget: createTimerWidget(20) },
+  { id: 'task-4', title: 'Faire une séance de sport', description: 'Prévoir 30 à 45 minutes d\'activité physique.', status: 'todo', widget: createTimerWidget(45) },
   { id: 'task-5', title: 'Avancer sur un projet personnel', description: 'Consacrer une heure à faire avancer un projet personnel.', status: 'en cours' },
   { id: 'task-6', title: 'Préparer une sortie en famille', description: 'Trouver une activité pour ce week-end.', status: 'backlog' },
   { id: 'task-7', title: 'Appeler un proche', description: 'Prendre quelques minutes pour appeler quelqu\'un que je n\'ai pas eu récemment.', status: 'backlog' },
