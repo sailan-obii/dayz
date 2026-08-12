@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {FaTrash, FaRedo, FaPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -6,6 +6,11 @@ import TopBar from '../components/Task/TopBar';
 import EditableTask from '../components/Task/EditableTask.jsx';
 import ActionModal from '../components/ActionModal';
 import { Link } from '../components/atoms/index.jsx';
+import {
+  syncAllTasks,
+  hasRunningTimer,
+  pauseTimerWidget,
+} from '../utils/taskWidget';
 
 import {
   Container,
@@ -27,11 +32,15 @@ const initialTasks = [
   { id: 'task-5', title: 'Avancer sur un projet personnel', description: 'Consacrer une heure à faire avancer un projet personnel.', status: 'en cours' },
   { id: 'task-6', title: 'Préparer une sortie en famille', description: 'Trouver une activité pour ce week-end.', status: 'backlog' },
   { id: 'task-7', title: 'Appeler un proche', description: 'Prendre quelques minutes pour appeler quelqu\'un que je n\'ai pas eu récemment.', status: 'backlog' },
-  { id: 'task-8', title: 'Boire de l\'eau', description: 'Consommer au moins 8 verres d\'eau par jour.', status: 'en cours' },
+  {
+    id: 'task-8',
+    title: 'Boire de l\'eau',
+    description: 'Consommer au moins 8 verres d\'eau par jour.',
+    status: 'en cours',
+    widget: { type: 'counter', target: 8, current: 0 },
+  },
   { id: 'task-9', title: 'Faire les courses', description: 'Acheter les produits nécessaires pour les prochains jours.', status: 'backlog' },
   { id: 'task-10', title: 'Faire une lessive', description: 'Lancer une machine et étendre le linge une fois terminé.', status: 'backlog' },
-
-  
 ];
 
 
@@ -39,23 +48,23 @@ const initialTasks = [
 function Today() {
   const [tasks, setTasks] = useState(() => {
     const savedTasks = localStorage.getItem('tasks');
-    return savedTasks ? JSON.parse(savedTasks) : initialTasks;
+    const parsed = savedTasks ? JSON.parse(savedTasks) : initialTasks;
+    return syncAllTasks(parsed);
   });
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [newTaskId, setNewTaskId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [timerTick, setTimerTick] = useState(0);
 
   const [showBacklog, setShowBacklog] = useState(false);
   const toggleBacklogVisibility = () => {
     setShowBacklog((prev) => !prev);
   };
 
-  // États pour gérer les modales
   const [modalType, setModalType] = useState(null);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [pendingAction, setPendingAction] = useState(null);
 
-  // Afficher la modale welcome à la première visite
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem('hasSeenTodayWelcome');
     if (!hasSeenWelcome) {
@@ -64,11 +73,41 @@ function Today() {
     }
   }, []);
 
-  // Sauvegarder les tâches dans le localStorage à chaque modification
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
-  
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTasks((prev) => {
+        if (!hasRunningTimer(prev)) return prev;
+        setTimerTick((t) => t + 1);
+        return syncAllTasks(prev);
+      });
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        setTasks((prev) => syncAllTasks(prev));
+        setTimerTick((t) => t + 1);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'tasks' && e.newValue) {
+        setTasks(syncAllTasks(JSON.parse(e.newValue)));
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const clearTasks = () => {
     setModalType('confirm-clear');
@@ -102,7 +141,7 @@ function Today() {
       status: 'backlog',
     };
     setTasks([newTask, ...tasks]);
-    setEditingTaskId(newTask.id); // Active le mode édition pour la nouvelle tâche
+    setEditingTaskId(newTask.id);
     setNewTaskId(newTask.id);
   };
   
@@ -171,28 +210,82 @@ function Today() {
   };
 
   const handleDoubleClick = (taskId) => {
-    if (!editingTaskId) {
-      setEditingTaskId(taskId);
-    }
+    if (editingTaskId) return;
+    setTasks((prev) => prev.map((t) => {
+      if (t.id !== taskId) return t;
+      if (t.widget?.type === 'timer' && t.widget?.isRunning) {
+        return { ...t, widget: pauseTimerWidget(t.widget) };
+      }
+      return t;
+    }));
+    setEditingTaskId(taskId);
   };
 
   const handleSave = (updatedTask) => {
-    setTasks(tasks.map(task => 
+    setTasks((prev) => syncAllTasks(prev.map(task =>
       task.id === updatedTask.id ? updatedTask : task
-    ));
+    )));
     setEditingTaskId(null);
     setNewTaskId(null);
   };
 
   const handleCancel = () => {
     if (newTaskId) {
-      setTasks(tasks.filter(task => task.id !== newTaskId)); // Supprime le ticket récemment créé
-      setNewTaskId(null); // Réinitialise l'ID du nouveau ticket
+      setTasks(tasks.filter(task => task.id !== newTaskId));
+      setNewTaskId(null);
     }
     setEditingTaskId(null);
   };
 
-  // Fonction pour gérer la suppression avec confirmation
+  const handleIncrement = useCallback((taskId) => {
+    setTasks((prev) => syncAllTasks(prev.map((t) => {
+      if (t.id !== taskId || t.widget?.type !== 'counter') return t;
+      const target = t.widget.target ?? 1;
+      const current = Math.min((t.widget.current ?? 0) + 1, target);
+      return { ...t, widget: { ...t.widget, current } };
+    })));
+  }, []);
+
+  const handleTimerStart = useCallback((taskId) => {
+    setTasks((prev) => syncAllTasks(prev.map((t) => {
+      if (t.id !== taskId || t.widget?.type !== 'timer') return t;
+      const w = t.widget;
+      const remainingMs = w.remainingMs ?? w.targetMinutes * 60 * 1000;
+      return {
+        ...t,
+        widget: {
+          ...w,
+          isRunning: true,
+          endAt: Date.now() + remainingMs,
+          remainingMs: null,
+        },
+      };
+    })));
+  }, []);
+
+  const handleTimerPause = useCallback((taskId) => {
+    setTasks((prev) => prev.map((t) => {
+      if (t.id !== taskId || t.widget?.type !== 'timer') return t;
+      return { ...t, widget: pauseTimerWidget(t.widget) };
+    }));
+  }, []);
+
+  const handleTimerReset = useCallback((taskId) => {
+    setTasks((prev) => prev.map((t) => {
+      if (t.id !== taskId || t.widget?.type !== 'timer') return t;
+      return {
+        ...t,
+        status: t.status === 'terminé' ? 'en cours' : t.status,
+        widget: {
+          ...t.widget,
+          isRunning: false,
+          endAt: null,
+          remainingMs: null,
+        },
+      };
+    }));
+  }, []);
+
   const handleDeleteClick = (taskId) => {
     const task = tasks.find(t => t.id === taskId);
     setTaskToDelete(task);
@@ -209,14 +302,12 @@ function Today() {
     }
   };
 
-  // Fonction pour fermer la modale
   const closeModal = () => {
     setModalType(null);
     setTaskToDelete(null);
     setPendingAction(null);
   };
 
-  // Fonction de suppression directe (passée aux EditableTask)
   const handleDelete = (taskId) => {
     handleDeleteClick(taskId);
   };
@@ -228,12 +319,10 @@ function Today() {
     }
   };
 
-  // Fonction pour afficher la modale welcome à la demande
   const showWelcome = () => {
     setModalType('welcome');
   };
 
-  // Fonction pour filtrer les tâches selon le terme de recherche
   const matchesSearchTerm = (task) => {
     if (!searchTerm) return true;
     const lowerSearchTerm = searchTerm.toLowerCase();
@@ -243,7 +332,6 @@ function Today() {
     );
   };
 
-  // Handlers pour la barre de recherche
   const handleSearchChange = (value) => {
     setSearchTerm(value);
   };
@@ -252,7 +340,6 @@ function Today() {
     setSearchTerm('');
   };
 
-  // Gérer la confirmation des modales
   const handleConfirm = () => {
     if (pendingAction === 'clear-tasks') {
       confirmClearTasks();
@@ -265,6 +352,14 @@ function Today() {
     } else if (modalType === 'confirm-delete') {
       confirmDelete();
     }
+  };
+
+  const widgetProps = {
+    onIncrement: handleIncrement,
+    onTimerStart: handleTimerStart,
+    onTimerPause: handleTimerPause,
+    onTimerReset: handleTimerReset,
+    timerTick,
   };
 
   const columns = ['todo', 'en cours', 'terminé'];
@@ -321,6 +416,7 @@ function Today() {
                                 onDelete={handleDelete}
                                 provided={provided}
                                 snapshot={snapshot}
+                                {...widgetProps}
                               />
                             </div>
                           )}
@@ -341,7 +437,6 @@ function Today() {
         </div>
         
         <TaskBoardContainer>
-          {/* Colonne Backlog */}
           {showBacklog && (
             <ColumnBacklog className={`backlog ${showBacklog ? 'show' : ''}`}>
               <ColumnBacklogHeader status="backlog">
@@ -364,7 +459,7 @@ function Today() {
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     isDraggingOver={snapshot.isDraggingOver}
-                    className="backlog-task-list" // Classe spécifique pour le backlog
+                    className="backlog-task-list"
                   >
                     {tasks
                       .filter(task => task.status === 'backlog' && matchesSearchTerm(task))
@@ -384,6 +479,7 @@ function Today() {
                                 onDelete={handleDelete}
                                 provided={provided}
                                 snapshot={snapshot}
+                                {...widgetProps}
                               />
                             </div>
                           )}

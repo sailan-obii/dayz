@@ -1,27 +1,129 @@
-import React, { useState } from 'react';
-import { Task, DeleteButton, EditForm, EditInput, EditTextarea, ButtonGroup, Button, TaskContent, TaskText } from './todayTask.styles';
+import React, { useState, useEffect } from 'react';
+import {
+  Task,
+  DeleteButton,
+  EditForm,
+  EditInput,
+  EditTextarea,
+  ButtonGroup,
+  Button,
+  TaskContent,
+  TaskText,
+  DragHandle,
+  OptionsToggle,
+  OptionsPanel,
+  OptionsLabel,
+  OptionsRow,
+  OptionsInput,
+  RemoveOptionButton,
+} from './todayTask.styles';
 import TaskIcon from './TaskIcon.jsx';
+import TaskWidget from './TaskWidget.jsx';
+import { deduceCounterTarget, deduceTimerMinutes } from '../../utils/deduceWidgetValue';
+import {
+  createCounterWidget,
+  createTimerWidget,
+  clampWidgetValue,
+  MAX_TIMER_MINUTES,
+} from '../../utils/taskWidget';
 
+const buildWidgetFromEdit = (widgetType, widgetValue, existingTask) => {
+  if (!widgetType) return undefined;
 
-const EditableTask = ({ 
+  if (widgetType === 'counter') {
+    const target = clampWidgetValue(widgetValue);
+    if (target === null) return undefined;
+    const previous = existingTask.widget?.type === 'counter' ? existingTask.widget : null;
+    return createCounterWidget(target, previous?.target === target ? (previous.current ?? 0) : 0);
+  }
+
+  if (widgetType === 'timer') {
+    const targetMinutes = clampWidgetValue(widgetValue, MAX_TIMER_MINUTES);
+    if (targetMinutes === null) return undefined;
+    const previous = existingTask.widget?.type === 'timer' ? existingTask.widget : null;
+    if (previous && previous.targetMinutes === targetMinutes) {
+      return { ...previous };
+    }
+    return createTimerWidget(targetMinutes);
+  }
+
+  return undefined;
+};
+
+const EditableTask = ({
   task,
   isEditing,
   onSave,
   onCancel,
   onDelete,
+  onIncrement,
+  onTimerStart,
+  onTimerPause,
+  onTimerReset,
+  timerTick,
   provided,
-  snapshot
+  snapshot,
 }) => {
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description);
+  const [showOptions, setShowOptions] = useState(!!task.widget);
+  const [widgetType, setWidgetType] = useState(task.widget?.type ?? null);
+  const [widgetValue, setWidgetValue] = useState(
+    String(task.widget?.target ?? task.widget?.targetMinutes ?? '')
+  );
+  const [valueManuallySet, setValueManuallySet] = useState(!!task.widget);
+
+  useEffect(() => {
+    setEditedTitle(task.title);
+    setEditedDescription(task.description);
+    setShowOptions(!!task.widget);
+    setWidgetType(task.widget?.type ?? null);
+    setWidgetValue(String(task.widget?.target ?? task.widget?.targetMinutes ?? ''));
+    setValueManuallySet(!!task.widget);
+  }, [task.id, task.title, task.description, task.widget]);
+
+  const deduceValueForType = (type) => {
+    if (type === 'counter') return deduceCounterTarget(editedTitle, editedDescription);
+    if (type === 'timer') return deduceTimerMinutes(editedTitle, editedDescription);
+    return null;
+  };
+
+  const handleWidgetTypeChange = (type) => {
+    setWidgetType(type);
+    if (!valueManuallySet || !widgetValue) {
+      const deduced = deduceValueForType(type);
+      if (deduced !== null) {
+        setWidgetValue(String(deduced));
+      }
+    }
+  };
+
+  const handleWidgetValueChange = (e) => {
+    setWidgetValue(e.target.value);
+    setValueManuallySet(true);
+  };
+
+  const handleRemoveWidget = () => {
+    setWidgetType(null);
+    setWidgetValue('');
+    setValueManuallySet(false);
+    setShowOptions(false);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({
+    const widget = buildWidgetFromEdit(widgetType, widgetValue, task);
+    const updatedTask = {
       ...task,
       title: editedTitle,
-      description: editedDescription
-    });
+      description: editedDescription,
+    };
+    if (widget) {
+      updatedTask.widget = widget;
+    } else {
+      delete updatedTask.widget;
+    }
+    onSave(updatedTask);
   };
 
   const handleDeleteClick = (e) => {
@@ -34,7 +136,6 @@ const EditableTask = ({
       <Task
         ref={provided.innerRef}
         {...provided.draggableProps}
-        {...provided.dragHandleProps}
         isDragging={snapshot.isDragging}
         status={task.status}
       >
@@ -53,6 +154,64 @@ const EditableTask = ({
             onChange={(e) => setEditedDescription(e.target.value)}
             placeholder="Description"
           />
+          {!showOptions ? (
+            <OptionsToggle type="button" onClick={() => setShowOptions(true)}>
+              + d&apos;options
+            </OptionsToggle>
+          ) : (
+            <OptionsPanel>
+              <OptionsLabel>
+                <input
+                  type="radio"
+                  name={`widget-type-${task.id}`}
+                  checked={widgetType === 'counter'}
+                  onChange={() => handleWidgetTypeChange('counter')}
+                />
+                Compteur
+              </OptionsLabel>
+              <OptionsLabel>
+                <input
+                  type="radio"
+                  name={`widget-type-${task.id}`}
+                  checked={widgetType === 'timer'}
+                  onChange={() => handleWidgetTypeChange('timer')}
+                />
+                Countdown
+              </OptionsLabel>
+              {widgetType === 'counter' && (
+                <OptionsRow>
+                  Objectif :
+                  <OptionsInput
+                    type="number"
+                    min="1"
+                    max="999"
+                    value={widgetValue}
+                    onChange={handleWidgetValueChange}
+                    placeholder="8"
+                  />
+                </OptionsRow>
+              )}
+              {widgetType === 'timer' && (
+                <OptionsRow>
+                  Durée :
+                  <OptionsInput
+                    type="number"
+                    min="1"
+                    max="480"
+                    value={widgetValue}
+                    onChange={handleWidgetValueChange}
+                    placeholder="20"
+                  />
+                  min
+                </OptionsRow>
+              )}
+              {widgetType && (
+                <RemoveOptionButton type="button" onClick={handleRemoveWidget}>
+                  Retirer l&apos;option
+                </RemoveOptionButton>
+              )}
+            </OptionsPanel>
+          )}
           <ButtonGroup>
             <Button type="submit">Enregistrer</Button>
             <Button type="button" variant="cancel" onClick={onCancel}>
@@ -68,16 +227,26 @@ const EditableTask = ({
     <Task
       ref={provided.innerRef}
       {...provided.draggableProps}
-      {...provided.dragHandleProps}
       isDragging={snapshot.isDragging}
       status={task.status}
     >
       <DeleteButton onClick={handleDeleteClick} type="button" />
       <TaskContent>
+        <DragHandle {...provided.dragHandleProps} aria-label="Déplacer la tâche">
+          ⠿
+        </DragHandle>
         <TaskIcon title={task.title} />
         <TaskText>
           <h3>{task.title}</h3>
           <p>{task.description}</p>
+          <TaskWidget
+            task={task}
+            onIncrement={onIncrement}
+            onTimerStart={onTimerStart}
+            onTimerPause={onTimerPause}
+            onTimerReset={onTimerReset}
+            tick={timerTick}
+          />
         </TaskText>
       </TaskContent>
     </Task>
