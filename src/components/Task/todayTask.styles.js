@@ -262,7 +262,8 @@ export const TimerDisplay = styled.div`
   font-size: 18px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: ${props => props.$done ? '#2e7d32' : '#000'};
+  color: ${props => props.$done ? '#2e7d32' : props.$inactive ? '#888' : '#000'};
+  opacity: ${props => props.$inactive && !props.$done ? 0.7 : 1};
 `;
 
 export const WidgetButtonGroup = styled.div`

@@ -10,7 +10,7 @@ import {
   formatTimerDisplay,
   getTimerRemainingMs,
   canUseWidgetControls,
-  isCounterInactive,
+  isWidgetInactive,
 } from '../../utils/taskWidget';
 
 const stopDragPropagation = (e) => {
@@ -36,7 +36,7 @@ const TaskWidget = ({
 
   if (widget.type === 'counter') {
     const atMax = (widget.current ?? 0) >= (widget.target ?? 1);
-    const inactive = isCounterInactive(task);
+    const inactive = isWidgetInactive(task);
     return (
       <WidgetContainer>
         <CounterBadge
@@ -62,9 +62,11 @@ const TaskWidget = ({
     const isRunning = widget.isRunning;
     const isDone = remainingMs === 0 && !isRunning;
 
+    const inactive = isWidgetInactive(task);
+
     return (
       <WidgetContainer $horizontal>
-        <TimerDisplay key={tick} $done={isDone}>{formatTimerDisplay(remainingMs)}</TimerDisplay>
+        <TimerDisplay key={tick} $done={isDone} $inactive={inactive}>{formatTimerDisplay(remainingMs)}</TimerDisplay>
         {canUseWidgetControls(task) && (
           <WidgetButtonGroup {...preventDragHandle}>
             {!isDone && !isRunning && (

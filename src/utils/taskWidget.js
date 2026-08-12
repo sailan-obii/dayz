@@ -82,7 +82,7 @@ export function canUseWidgetControls(task) {
   return task?.status === 'en cours';
 }
 
-export function isCounterInactive(task) {
+export function isWidgetInactive(task) {
   return task?.status === 'todo' || task?.status === 'terminé';
 }
 
