@@ -26,32 +26,49 @@ import {
   MAX_TIMER_MINUTES,
 } from '../../utils/taskWidget';
 
-// `#mot` → gras, `~mot` → barré (le marqueur n'est pas affiché).
-// Un mot : lettres (accents inclus), chiffres, apostrophes et tirets.
-const MARKED_WORD_PATTERN = /(?<![\p{L}\p{N}])([#~])([\p{L}\p{N}][\p{L}\p{N}'’-]*)/gu;
+// `#mot` → gras (un mot : lettres, chiffres, apostrophes, tirets).
+// `~phrase~` → barré (un ou plusieurs mots, le ~ n'est pas affiché).
+const STRIKE_PHRASE_PATTERN = /~([^~]+)~/g;
+
+const formatBoldWords = (text, nextKey) => {
+  const pattern = /(?<![\p{L}\p{N}])#([\p{L}\p{N}][\p{L}\p{N}'’-]*)/gu;
+  const nodes = [];
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(pattern)) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    nodes.push(<strong key={nextKey()}>{match[1]}</strong>);
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes;
+};
 
 const formatTaskText = (text = '') => {
   const withBreaks = String(text).replace(/\./g, '.\n');
   const nodes = [];
   let lastIndex = 0;
   let key = 0;
+  const nextKey = () => key++;
 
-  for (const match of withBreaks.matchAll(MARKED_WORD_PATTERN)) {
+  STRIKE_PHRASE_PATTERN.lastIndex = 0;
+
+  for (const match of withBreaks.matchAll(STRIKE_PHRASE_PATTERN)) {
     if (match.index > lastIndex) {
-      nodes.push(withBreaks.slice(lastIndex, match.index));
+      nodes.push(...formatBoldWords(withBreaks.slice(lastIndex, match.index), nextKey));
     }
-    const marker = match[1];
-    const word = match[2];
-    nodes.push(
-      marker === '#'
-        ? <strong key={key++}>{word}</strong>
-        : <s key={key++}>{word}</s>
-    );
+    nodes.push(<s key={nextKey()}>{formatBoldWords(match[1], nextKey)}</s>);
     lastIndex = match.index + match[0].length;
   }
 
   if (lastIndex < withBreaks.length) {
-    nodes.push(withBreaks.slice(lastIndex));
+    nodes.push(...formatBoldWords(withBreaks.slice(lastIndex), nextKey));
   }
 
   return nodes;
@@ -183,7 +200,7 @@ const EditableTask = ({
           <EditTextarea
             value={editedDescription}
             onChange={(e) => setEditedDescription(e.target.value)}
-            placeholder="Description"
+            placeholder="Description (~phrase barrée~, #gras)"
           />
           {!showOptions ? (
             <OptionsToggle type="button" onClick={() => setShowOptions(true)}>

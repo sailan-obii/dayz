@@ -182,7 +182,7 @@ const ActionModal = ({
             <strong>Gérer le backlog :</strong> Affichez le backlog pour planifier vos futures tâches
             </li>
             <li>
-            <strong>Formater le texte :</strong> Un point va à la ligne. Tapez #mot pour le gras, ~mot pour barrer
+            <strong>Formater le texte :</strong> Un point va à la ligne. Tapez #mot pour le gras, ~une phrase~ pour barrer
             </li>
             <li>
             <strong>Sauvegarde automatique :</strong> Toutes vos modifications sont automatiquement enregistrées
