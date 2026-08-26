@@ -27,8 +27,8 @@ import {
 } from '../../utils/taskWidget';
 
 // `#mot` → gras (un mot : lettres, chiffres, apostrophes, tirets).
-// `~phrase~` → barré (un ou plusieurs mots, le ~ n'est pas affiché).
-const STRIKE_PHRASE_PATTERN = /~([^~]+)~/g;
+// `~phrase.` → barré jusqu'au prochain point (le ~ n'est pas affiché, le point reste).
+const STRIKE_UNTIL_PERIOD_PATTERN = /(?<![\p{L}\p{N}])~([^\n]*\.)/gu;
 
 const formatBoldWords = (text, nextKey) => {
   const pattern = /(?<![\p{L}\p{N}])#([\p{L}\p{N}][\p{L}\p{N}'’-]*)/gu;
@@ -57,9 +57,9 @@ const formatTaskText = (text = '') => {
   let key = 0;
   const nextKey = () => key++;
 
-  STRIKE_PHRASE_PATTERN.lastIndex = 0;
+  STRIKE_UNTIL_PERIOD_PATTERN.lastIndex = 0;
 
-  for (const match of withBreaks.matchAll(STRIKE_PHRASE_PATTERN)) {
+  for (const match of withBreaks.matchAll(STRIKE_UNTIL_PERIOD_PATTERN)) {
     if (match.index > lastIndex) {
       nodes.push(...formatBoldWords(withBreaks.slice(lastIndex, match.index), nextKey));
     }
@@ -200,7 +200,7 @@ const EditableTask = ({
           <EditTextarea
             value={editedDescription}
             onChange={(e) => setEditedDescription(e.target.value)}
-            placeholder="Description (~phrase barrée~, #gras)"
+            placeholder="Description (~phrase barrée., #gras)"
           />
           {!showOptions ? (
             <OptionsToggle type="button" onClick={() => setShowOptions(true)}>
