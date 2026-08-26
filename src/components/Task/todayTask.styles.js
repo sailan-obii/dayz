@@ -134,6 +134,7 @@ export const Task = styled.div`
     margin: 0;
     color: #000;
     overflow-wrap: break-word;
+    white-space: pre-line;
   }
 `;
 

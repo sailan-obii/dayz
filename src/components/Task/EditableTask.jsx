@@ -26,6 +26,8 @@ import {
   MAX_TIMER_MINUTES,
 } from '../../utils/taskWidget';
 
+const formatTaskText = (text = '') => String(text).replace(/\./g, '.\n');
+
 const buildWidgetFromEdit = (widgetType, widgetValue, existingTask) => {
   if (!widgetType) return undefined;
 
@@ -236,7 +238,7 @@ const EditableTask = ({
         <TaskIcon title={task.title} />
         <TaskText>
           <h3>{task.title}</h3>
-          <p>{task.description}</p>
+          <p>{formatTaskText(task.description)}</p>
           <TaskWidget
             task={task}
             onIncrement={onIncrement}
