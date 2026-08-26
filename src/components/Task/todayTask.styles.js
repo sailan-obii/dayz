@@ -139,6 +139,10 @@ export const Task = styled.div`
     strong {
       font-weight: 700;
     }
+
+    s {
+      text-decoration: line-through;
+    }
   }
 `;
 
