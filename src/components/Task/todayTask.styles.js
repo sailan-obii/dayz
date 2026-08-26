@@ -135,6 +135,10 @@ export const Task = styled.div`
     color: #000;
     overflow-wrap: break-word;
     white-space: pre-line;
+
+    strong {
+      font-weight: 700;
+    }
   }
 `;
 
