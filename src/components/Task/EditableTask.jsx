@@ -26,7 +26,30 @@ import {
   MAX_TIMER_MINUTES,
 } from '../../utils/taskWidget';
 
-const formatTaskText = (text = '') => String(text).replace(/\./g, '.\n');
+// `#mot` → mot en gras (le # est un marqueur, il n'est pas affiché).
+// Un mot : lettres (accents inclus), chiffres, apostrophes et tirets.
+const BOLD_WORD_PATTERN = /(?<![\p{L}\p{N}])#([\p{L}\p{N}][\p{L}\p{N}'’-]*)/gu;
+
+const formatTaskText = (text = '') => {
+  const withBreaks = String(text).replace(/\./g, '.\n');
+  const nodes = [];
+  let lastIndex = 0;
+  let key = 0;
+
+  for (const match of withBreaks.matchAll(BOLD_WORD_PATTERN)) {
+    if (match.index > lastIndex) {
+      nodes.push(withBreaks.slice(lastIndex, match.index));
+    }
+    nodes.push(<strong key={key++}>{match[1]}</strong>);
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < withBreaks.length) {
+    nodes.push(withBreaks.slice(lastIndex));
+  }
+
+  return nodes;
+};
 
 const buildWidgetFromEdit = (widgetType, widgetValue, existingTask) => {
   if (!widgetType) return undefined;
