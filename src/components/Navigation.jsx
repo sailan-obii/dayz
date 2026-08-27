@@ -62,13 +62,13 @@ const StyledNavLink = styled(NavLink)`
 function Navigation() {
   return (
     <NavBar>
-      <StyledNavLink to="/upcoming">
-        <LogoImg src={logoUpcoming} alt="Upcoming" />
-        <LogoTitle>Événements</LogoTitle>
-      </StyledNavLink>
       <StyledNavLink to="/today-list" end>
         <LogoImg src={logoToday} alt="Today" />
         <LogoTitle>Liste du jour</LogoTitle>
+      </StyledNavLink>
+      <StyledNavLink to="/upcoming">
+        <LogoImg src={logoUpcoming} alt="Upcoming" />
+        <LogoTitle>Événements</LogoTitle>
       </StyledNavLink>
     </NavBar>
   );
