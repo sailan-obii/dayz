@@ -9,7 +9,7 @@ function App() {
     <>
       <Navigation />
       <Routes>
-        <Route path="/" element={<Navigate to="/upcoming" replace />} />
+        <Route path="/" element={<Navigate to="/today-list" replace />} />
         <Route path="/today-list" element={<Today />} />
         <Route path="/upcoming" element={<Upcoming />} />
       </Routes>
